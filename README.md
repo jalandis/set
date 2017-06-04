@@ -1,4 +1,6 @@
-## Set Game Scala Application
+## Scala Set Game
+
+![](docs/app.png)
 
 ## Testing
 
