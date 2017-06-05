@@ -103,7 +103,7 @@ object SetApp extends JFXApp {
   }
 
   def getOval(card: Card): Shape = new Path {
-    elements ++= List(
+    elements = List(
       MoveTo(35, 35),
       HLineTo(75),
       ArcTo(20, 20, 180, 75, 75, true, true),
