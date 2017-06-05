@@ -16,4 +16,6 @@ object Counts extends Enumeration {
   val Single, Double, Triple = Value
 }
 
-class Card(val color: Colors.Value, val shape: Shapes.Value, val fill: Fills.Value, val count: Counts.Value)
+class Card(val color: Colors.Value, val shape: Shapes.Value, val fill: Fills.Value, val count: Counts.Value) {
+  override def toString(): String = "(" + color + ", " + shape + ", " + fill + ", " + count + ")"
+}
