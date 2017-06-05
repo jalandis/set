@@ -1,7 +1,7 @@
 package com.jalandis.set
 
 object Colors extends Enumeration {
-  val Red, Green, Blue = Value
+  val Red, Green, Purple = Value
 }
 
 object Shapes extends Enumeration {

@@ -18,8 +18,8 @@ object SetApp extends JFXApp {
   def getColor(card: Card): Color = {
     card.color match {
       case Colors.Red => Color.Red
-      case Colors.Green => Color.Green
-      case Colors.Blue => Color.Blue
+      case Colors.Green => Color.SeaGreen
+      case Colors.Purple => Color.Purple
     }
   }
 
