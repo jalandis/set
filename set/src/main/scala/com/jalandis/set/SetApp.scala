@@ -10,6 +10,7 @@ import scalafx.scene.shape.{ArcTo, CubicCurveTo, HLineTo, LineTo, MoveTo, Path, 
 import scalafx.collections.ObservableBuffer
 import scalafx.collections.ObservableBuffer.{ Add, Remove }
 import com.typesafe.scalalogging.Logger
+import scalafx.scene.control.{ Button, ToolBar }
 
 object SetApp extends JFXApp {
   private val logger = Logger("set")
@@ -30,16 +31,18 @@ object SetApp extends JFXApp {
     }
 
     def replaceCardView(oldCardView: CardView) {
-      var hand = model.getCards(1)
-      val cardViewModel = new CardViewModel(hand(0), oldCardView.model.row, oldCardView.model.col)
-      val cardView = new CardView(cardViewModel)
-      GridPane.setConstraints(cardView.node, cardView.model.row, cardView.model.col)
-
-      // Update model and view
-      model.cardViews += cardView
       model.cardViews -= oldCardView
       view.cardGrid.getChildren().remove(oldCardView.node)
-      view.cardGrid.getChildren().add(cardView.node)
+
+      if (deck.size != 0) {
+        var hand = model.getCards(1)
+        val cardViewModel = new CardViewModel(hand(0), oldCardView.model.row, oldCardView.model.col)
+        val cardView = new CardView(cardViewModel)
+        GridPane.setConstraints(cardView.node, cardView.model.row, cardView.model.col)
+
+        model.cardViews += cardView
+        view.cardGrid.getChildren().add(cardView.node)
+      }
     }
 
     val cardViews = new ObservableBuffer[CardView]()
@@ -100,7 +103,18 @@ object SetApp extends JFXApp {
 
     val scene = new Scene {
       fill = Color.Grey
-      content = cardGrid
+      content = new VBox {
+        children = Seq(
+          new ToolBar {
+            prefWidth = 500
+            content = Seq(
+              new Button {
+                text = "More Cards"
+              }, new Button {
+                text = "New Game"
+              })
+          }, cardGrid)
+      }
     }
   }
 }

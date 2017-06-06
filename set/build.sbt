@@ -1,5 +1,7 @@
 import Dependencies._
 
+unmanagedJars in Compile += Attributed.blank(file(System.getenv("JAVA_HOME") + "/jre/lib/ext/jfxrt.jar"))
+
 lazy val root = (project in file(".")).
   settings(
     inThisBuild(List(
