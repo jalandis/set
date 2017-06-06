@@ -129,7 +129,7 @@ object CardView {
   }
 }
 
-class CardView(model: CardViewModel) {
+class CardView(val model: CardViewModel) {
   val node: StackPane = new StackPane() {
     children = List(
       new Rectangle {

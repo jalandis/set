@@ -14,8 +14,11 @@ object Game {
 
   def dealCards(cards: Deck, count: Int): (Deck, Deck) = cards.splitAt(count)
 
-  def validSet(a: Card, b: Card, c: Card): Boolean = {
-    validColor(a, b, c) && validShape(a, b, c) && validFill(a, b, c) && validCount(a, b, c)
+  def validSet(cards: Deck): Boolean = {
+    if (cards.size == 3) {
+      val a :: b :: c :: rest = cards
+      validColor(a, b, c) && validShape(a, b, c) && validFill(a, b, c) && validCount(a, b, c)
+    } else false
   }
 
   def validColor(a: Card, b: Card, c: Card): Boolean = valid(a.color.id, b.color.id, c.color.id)

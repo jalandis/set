@@ -8,9 +8,11 @@ import scalafx.scene.paint.Color
 import scalafx.scene.Scene
 import scalafx.scene.shape.{ArcTo, CubicCurveTo, HLineTo, LineTo, MoveTo, Path, Rectangle, Shape, VLineTo}
 import scalafx.collections.ObservableBuffer
-import scalafx.collections.ObservableBuffer.Add
+import scalafx.collections.ObservableBuffer.{ Add, Remove }
+import com.typesafe.scalalogging.Logger
 
 object SetApp extends JFXApp {
+  private val logger = Logger("set")
   private val model = new ViewModel()
   private val view = new View(model)
 
@@ -20,25 +22,41 @@ object SetApp extends JFXApp {
   }
 
   private class ViewModel {
-    var (hand, deck) = Game.dealCards(Game(), 12)
-    val cardViewModels = new ObservableBuffer[CardViewModel]()
+    private var deck = Game()
+    def getCards(count: Int): List[Card] = {
+      var (hand, remaining) = Game.dealCards(deck, count)
+      deck = remaining
+      hand
+    }
 
-    cardViewModels.onChange((buffer, changes) => {
+    def replaceCardView(oldCardView: CardView) {
+      var hand = model.getCards(1)
+      val cardViewModel = new CardViewModel(hand(0), oldCardView.model.row, oldCardView.model.col)
+      val cardView = new CardView(cardViewModel)
+      GridPane.setConstraints(cardView.node, cardView.model.row, cardView.model.col)
+
+      // Update model and view
+      model.cardViews += cardView
+      model.cardViews -= oldCardView
+      view.cardGrid.getChildren().remove(oldCardView.node)
+      view.cardGrid.getChildren().add(cardView.node)
+    }
+
+    val cardViews = new ObservableBuffer[CardView]()
+    cardViews.onChange((buffer, changes) => {
        changes.toList match {
+        case (List(Remove(position, elements))) => logger.info("Removing element from list")
         case (List(Add(position, elements))) => {
           elements.foreach(x => {
-            x.selected.onChange((_, _, newValue) => {
-              val selected = cardViewModels.filter(_.selected()).map(_.card)
-              if (selected.size == 3) {
-                if (Game.validSet(selected(0), selected(1), selected(2))) {
-                  println("Valid Set")
-                } else {
-                  println("Invalid Set")
-                }
+            x.model.selected.onChange((_, _, newValue) => {
+              val selected = cardViews.filter(_.model.selected())
+              if (Game.validSet(selected.map(_.model.card).toList)) {
+                selected.foreach(replaceCardView(_))
               }
             })
           })
         }
+        case _ => logger.error("Unsupported operation")
       }
     })
   }
@@ -48,39 +66,41 @@ object SetApp extends JFXApp {
     val cardHeight = 150
     val colInfo = new ColumnConstraints(minWidth = cardWidth, prefWidth = cardWidth, maxWidth = cardWidth)
     val rowInfo = new RowConstraints(minHeight = cardHeight, prefHeight = cardHeight, maxHeight = cardHeight)
+    var initialHand = model.getCards(12)
+
+    val cardGrid = new GridPane {
+      hgap = 6
+      vgap = 6
+      padding = Insets(18)
+
+      // 6 columns
+      columnConstraints.add(colInfo)
+      columnConstraints.add(colInfo)
+      columnConstraints.add(colInfo)
+      columnConstraints.add(colInfo)
+      columnConstraints.add(colInfo)
+      columnConstraints.add(colInfo)
+
+      // 4 rows
+      rowConstraints.add(rowInfo)
+      rowConstraints.add(rowInfo)
+      rowConstraints.add(rowInfo)
+      rowConstraints.add(rowInfo)
+
+      children = for {
+        i <- 0 until 3
+        j <- 0 until 4
+      } yield {
+        val cardView = new CardView(new CardViewModel(initialHand(i * 4 + j), j + 1, i))
+        model.cardViews += cardView
+        GridPane.setConstraints(cardView.node, j + 1, i)
+        cardView.node
+      }
+    }
 
     val scene = new Scene {
       fill = Color.Grey
-      content = new GridPane {
-        hgap = 6
-        vgap = 6
-        padding = Insets(18)
-
-        // 6 columns
-        columnConstraints.add(colInfo)
-        columnConstraints.add(colInfo)
-        columnConstraints.add(colInfo)
-        columnConstraints.add(colInfo)
-        columnConstraints.add(colInfo)
-        columnConstraints.add(colInfo)
-
-        // 4 rows
-        rowConstraints.add(rowInfo)
-        rowConstraints.add(rowInfo)
-        rowConstraints.add(rowInfo)
-        rowConstraints.add(rowInfo)
-
-        children = for {
-          i <- 0 until 3
-          j <- 0 until 4
-        } yield {
-          val cardViewModel = new CardViewModel(model.hand(i * 4 + j), j + 1, i)
-          val cardView = new CardView(cardViewModel)
-          model.cardViewModels += cardViewModel
-          GridPane.setConstraints(cardView.node, j + 1, i)
-          cardView.node
-        }
-      }
+      content = cardGrid
     }
   }
 }
