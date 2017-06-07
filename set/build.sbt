@@ -11,6 +11,7 @@ lazy val root = (project in file(".")).
     )),
     name := "Set",
     libraryDependencies += "org.scalafx" %% "scalafx" % "8.0.102-R11",
+    libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.7",
     libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",
     libraryDependencies += scalaTest % Test,
     libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.13.4" % "test"

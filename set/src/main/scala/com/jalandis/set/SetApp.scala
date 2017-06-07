@@ -24,28 +24,35 @@ object SetApp extends JFXApp {
 
   private class ViewModel {
     private var deck = Game()
+    val cardViews = new ObservableBuffer[CardView]()
+
     def getCards(count: Int): List[Card] = {
       var (hand, remaining) = Game.dealCards(deck, count)
       deck = remaining
       hand
     }
 
-    def replaceCardView(oldCardView: CardView) {
-      model.cardViews -= oldCardView
-      view.cardGrid.getChildren().remove(oldCardView.node)
+    def removeCardView(cardView: CardView) {
+      model.cardViews -= cardView
+      view.cardGrid.getChildren().remove(cardView.node)
+    }
 
+    def addCardView(row: Int, col: Int) {
       if (deck.size != 0) {
         var hand = model.getCards(1)
-        val cardViewModel = new CardViewModel(hand(0), oldCardView.model.row, oldCardView.model.col)
+        val cardViewModel = new CardViewModel(hand(0), row, col)
         val cardView = new CardView(cardViewModel)
-        GridPane.setConstraints(cardView.node, cardView.model.row, cardView.model.col)
+        GridPane.setConstraints(cardView.node, row, col)
 
         model.cardViews += cardView
         view.cardGrid.getChildren().add(cardView.node)
       }
     }
+    def replaceCardView(cardView: CardView) {
+      removeCardView(cardView)
+      addCardView(cardView.model.row, cardView.model.col)
+    }
 
-    val cardViews = new ObservableBuffer[CardView]()
     cardViews.onChange((buffer, changes) => {
        changes.toList match {
         case (List(Remove(position, elements))) => logger.info("Removing element from list")
@@ -65,10 +72,6 @@ object SetApp extends JFXApp {
   }
 
   private class View(model: ViewModel) {
-    val cardWidth = 100
-    val cardHeight = 150
-    val colInfo = new ColumnConstraints(minWidth = cardWidth, prefWidth = cardWidth, maxWidth = cardWidth)
-    val rowInfo = new RowConstraints(minHeight = cardHeight, prefHeight = cardHeight, maxHeight = cardHeight)
     var initialHand = model.getCards(12)
 
     val cardGrid = new GridPane {
@@ -76,27 +79,17 @@ object SetApp extends JFXApp {
       vgap = 6
       padding = Insets(18)
 
-      // 6 columns
-      columnConstraints.add(colInfo)
-      columnConstraints.add(colInfo)
-      columnConstraints.add(colInfo)
-      columnConstraints.add(colInfo)
-      columnConstraints.add(colInfo)
-      columnConstraints.add(colInfo)
-
-      // 4 rows
-      rowConstraints.add(rowInfo)
-      rowConstraints.add(rowInfo)
-      rowConstraints.add(rowInfo)
-      rowConstraints.add(rowInfo)
+      // Resize stage with new cards
+      // TODO: Test other syntax
+      width onChange { stage.width = width.get }
 
       children = for {
         i <- 0 until 3
         j <- 0 until 4
       } yield {
-        val cardView = new CardView(new CardViewModel(initialHand(i * 4 + j), j + 1, i))
+        val cardView = new CardView(new CardViewModel(initialHand(i * 4 + j), j, i))
         model.cardViews += cardView
-        GridPane.setConstraints(cardView.node, j + 1, i)
+        GridPane.setConstraints(cardView.node, j, i)
         cardView.node
       }
     }
@@ -104,15 +97,26 @@ object SetApp extends JFXApp {
     val scene = new Scene {
       fill = Color.Grey
       content = new VBox {
+        fillWidth = true
         children = Seq(
           new ToolBar {
-            prefWidth = 500
             content = Seq(
               new Button {
-                text = "More Cards"
-              }, new Button {
                 text = "New Game"
-              })
+                onAction = { ae => {
+                  logger.error("Button not supported yet")
+                }}
+              },
+              new Button {
+                text = "More Cards"
+                onAction = { ae => {
+                  val row = model.cardViews.size / 3
+                  model.addCardView(row, 0)
+                  model.addCardView(row, 1)
+                  model.addCardView(row, 2)
+                }}
+              }
+            )
           }, cardGrid)
       }
     }
