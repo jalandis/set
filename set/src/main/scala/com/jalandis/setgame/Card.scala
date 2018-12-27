@@ -1,4 +1,4 @@
-package com.jalandis.set
+package com.jalandis.setgame
 
 object Colors extends Enumeration {
   val Red, Green, Purple = Value

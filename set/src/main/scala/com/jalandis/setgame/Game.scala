@@ -1,4 +1,4 @@
-package com.jalandis.set
+package com.jalandis.setgame
 
 import scala.util.Random
 
