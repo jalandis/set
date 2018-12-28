@@ -49,3 +49,15 @@ JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 sbt debian:packageBin
 ```
 sbt windows:binPackage
 ```
+
+### CircleCI
+
+To test locally:
+```
+curl -fLSs https://circle.ci/cli | bash
+```
+
+Setup key and then run build:
+```
+circleci local execute --job build
+```
