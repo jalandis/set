@@ -1,0 +1,8 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: hseeberger/scala-sbt
+    steps:
+      - checkout
+      - run: echo "A first hello"
