@@ -1,6 +1,6 @@
 import Dependencies._
 
-unmanagedJars in Compile += Attributed.blank(file(System.getenv("JAVA_HOME  ") + "/jre/lib/ext/jfxrt.jar"))
+unmanagedJars in Compile += Attributed.blank(file("/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/jfxrt.jar"))
 
 lazy val root = (project in file("."))
   .enablePlugins(JavaAppPackaging, DebianPlugin, WindowsPlugin)

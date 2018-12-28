@@ -14,6 +14,8 @@ import scalafx.scene.control.{ Button, ToolBar }
 
 object SetApp extends JFXApp {
   private val logger = Logger("set")
+  private val gameSize = 12
+
   private val model = new ViewModel()
   private val view = new View(model)
 
@@ -48,9 +50,26 @@ object SetApp extends JFXApp {
         view.cardGrid.getChildren().add(cardView.node)
       }
     }
-    def replaceCardView(cardView: CardView) {
-      removeCardView(cardView)
-      addCardView(cardView.model.row, cardView.model.col)
+
+    def reorganize() {
+      logger.debug("Reorganizing cards")
+
+      model.cardViews.sort((left, right) => {
+        left.model.col < right.model.col || left.model.col == right.model.col && left.model.row < right.model.row
+      })
+
+      var count = 0
+      val rows = model.cardViews.size / 3
+
+      logger.debug("Number of cards: " + model.cardViews.size)
+      logger.debug("Number of rows: " + rows)
+      model.cardViews.foreach((cardView) => {
+        cardView.model.row = count % rows
+        cardView.model.col = Math.floor(count / rows).toInt
+        GridPane.setConstraints(cardView.node, cardView.model.row, cardView.model.col)
+
+        count = count + 1
+      })
     }
 
     cardViews.onChange((buffer, changes) => {
@@ -61,7 +80,15 @@ object SetApp extends JFXApp {
             x.model.selected.onChange((_, _, newValue) => {
               val selected = cardViews.filter(_.model.selected())
               if (Game.validSet(selected.map(_.model.card).toList)) {
-                selected.foreach(replaceCardView(_))
+                selected.foreach((cardView) => {
+                  removeCardView(cardView)
+
+                  if (model.cardViews.size < gameSize) {
+                    addCardView(cardView.model.row, cardView.model.col)
+                  }
+                })
+
+                reorganize()
               }
             })
           })
@@ -72,7 +99,7 @@ object SetApp extends JFXApp {
   }
 
   private class View(model: ViewModel) {
-    var initialHand = model.getCards(12)
+    var initialHand = model.getCards(gameSize)
 
     val cardGrid = new GridPane {
       hgap = 6
@@ -81,7 +108,10 @@ object SetApp extends JFXApp {
 
       // Resize stage with new cards
       // TODO: Test other syntax
-      width onChange { stage.width = width.get }
+      width onChange {
+        stage.width = width.get
+        stage.height = 600
+      }
 
       children = for {
         i <- 0 until 3

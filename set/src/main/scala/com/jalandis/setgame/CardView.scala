@@ -8,7 +8,7 @@ import scalafx.scene.shape.{ArcTo, CubicCurveTo, HLineTo, LineTo, MoveTo, Path, 
 import scalafx.beans.property.{ BooleanProperty, ObjectProperty }
 import scalafx.collections.ObservableBuffer
 
-class CardViewModel(val card: Card, val row: Int, val col: Int) {
+class CardViewModel(val card: Card, var row: Int, var col: Int) {
   val selected = new BooleanProperty(this, "selected", false)
 }
 
