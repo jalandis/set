@@ -1,5 +1,7 @@
 ## Scala Set Game
 
+[![CircleCI](https://circleci.com/gh/jalandis/set/tree/master.svg?style=svg)](https://circleci.com/gh/jalandis/set/tree/master)
+
 ![](docs/app.png)
 
 ## Setup
