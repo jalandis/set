@@ -1,0 +1,31 @@
+image: hseeberger/scala-sbt
+
+variables:
+  SBT_OPTS: "-Dsbt.global.base=sbt-cache/.sbtboot -Dsbt.boot.directory=sbt-cache/.boot -Dsbt.ivy.home=sbt-cache/.ivy"
+
+cache:
+  key: "$CI_BUILD_REF_NAME"
+  untracked: true
+  paths:
+    - "set/sbt-cache/.ivy/.cache"
+    - "set/sbt-cache/.boot"
+    - "set/sbt-cache/.sbtboot"
+    - "set/sbt-cache/target"
+
+stages:
+  - lint
+
+before_script:
+  ## Insall OpenJFX requirement
+  - apt-get update -y
+  - apt-get install openjfx -y
+
+lint:
+  stage: lint
+  script:
+    - cd set
+    - sbt clean scalastyle
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    paths:
+      - set/target/scalastyle-result.xml
