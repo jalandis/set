@@ -7,7 +7,8 @@ cache:
   key: "$CI_BUILD_REF_NAME"
   untracked: true
   paths:
-    - "set/sbt-cache/.ivy/.cache"
+    - "apt-cache/"
+    - "set/sbt-cache/.ivy/cache"
     - "set/sbt-cache/.boot"
     - "set/sbt-cache/.sbtboot"
     - "set/sbt-cache/target"
@@ -17,8 +18,10 @@ stages:
 
 before_script:
   ## Insall OpenJFX requirement
-  - apt-get update -y
-  - apt-get install openjfx -y
+  - export APT_CACHE_DIR="$(pwd)/apt-cache"
+  - mkdir -p ${APT_CACHE_DIR}
+  - apt-get -o dir::cache::archives=${APT_CACHE_DIR} update -y
+  - apt-get -o dir::cache::archives=${APT_CACHE_DIR} install openjfx -y
 
 lint:
   stage: lint
